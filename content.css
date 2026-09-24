@@ -1,0 +1,45 @@
+.linguist-tooltip {
+  position: absolute;
+  z-index: 2147483647; /* Máximo possível */
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  padding: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-width: 150px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #333333;
+}
+
+.linguist-btn, .linguist-btn-save {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.linguist-btn:hover, .linguist-btn-save:hover {
+  background: #4338ca;
+}
+
+.linguist-btn-save.linguist-saved {
+  background: #10b981;
+  cursor: default;
+}
+
+.linguist-translation {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}

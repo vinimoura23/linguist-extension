@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Linguist - Flashcards</title>
+  <style>
+    body {
+      width: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 16px;
+      background: #f9fafb;
+      color: #111827;
+      margin: 0;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    button.clear-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    button.clear-btn:hover { background: #dc2626; }
+    #flashcards-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .flashcard {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .original { 
+      font-weight: bold; 
+      font-size: 16px;
+      margin: 0 0 4px 0; 
+    }
+    .translated { 
+      color: #4f46e5; 
+      margin: 0 0 8px 0; 
+      font-size: 14px;
+    }
+    .context { 
+      font-size: 12px; 
+      color: #6b7280; 
+      font-style: italic; 
+      background: #f3f4f6;
+      padding: 6px;
+      border-radius: 4px;
+      margin: 0;
+    }
+    .empty { 
+      color: #6b7280; 
+      text-align: center; 
+      margin-top: 30px; 
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    Meus Flashcards
+    <button id="clear-all" class="clear-btn">Limpar</button>
+  </h2>
+  <div id="flashcards-list"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
