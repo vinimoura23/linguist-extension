@@ -3,9 +3,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Buscar idioma alvo das configurações (padrão 'pt')
     chrome.storage.local.get({ targetLang: 'pt' }, (result) => {
       const targetLang = result.targetLang;
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(request.text)}`;
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t`;
       
-      fetch(url)
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ q: request.text })
+      })
         .then(response => response.json())
         .then(data => {
           const translation = data[0].map(item => item[0]).join("");
@@ -39,6 +43,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   
   if (request.action === "playAudio") {
+    // A API não-oficial do Google TTS (tw-ob) recusa textos maiores que ~200 caracteres.
+    // Para textos longos, vamos direto para a voz nativa do navegador (chrome.tts).
+    if (request.text.length > 200) {
+      chrome.tts.speak(request.text, { lang: 'en-US' });
+      sendResponse({ error: "Texto muito longo para Google TTS, usando chrome.tts" });
+      return true;
+    }
+
     const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(request.text)}`;
     fetch(url)
       .then(r => {

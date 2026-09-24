@@ -16,7 +16,7 @@ document.addEventListener("mouseup", (event) => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
 
-    if (text.length > 0 && text.length < 300) { 
+    if (text.length > 0 && text.length < 2000) { 
       currentSelection = text;
       
       const node = selection.anchorNode;
