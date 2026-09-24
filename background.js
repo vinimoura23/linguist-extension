@@ -37,4 +37,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  
+  if (request.action === "playAudio") {
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(request.text)}`;
+    fetch(url)
+      .then(r => {
+        if (!r.ok) throw new Error("HTTP error " + r.status);
+        return r.arrayBuffer();
+      })
+      .then(buffer => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const base64 = btoa(binary);
+        sendResponse({ audioDataUrl: 'data:audio/mp3;base64,' + base64 });
+      })
+      .catch(error => {
+        console.error("Google TTS via background failed, falling back to chrome.tts", error);
+        // Fallback para chrome.tts no background script
+        chrome.tts.speak(request.text, { lang: 'en-US' });
+        sendResponse({ error: "Usando chrome.tts fallback" });
+      });
+    return true;
+  }
 });

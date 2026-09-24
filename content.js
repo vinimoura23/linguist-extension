@@ -138,20 +138,13 @@ function showTranslationPanel(translation) {
 }
 
 function playAudio(text) {
-  // A API do Google Tradutor via 'tw-ob' costuma ser mais confiável e ter voz melhor
-  // que o window.speechSynthesis, especialmente dentro de extensões.
-  // Assumimos 'en' como idioma padrão de leitura.
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(text)}`;
-  
-  const audio = new Audio(url);
-  audio.play().catch(e => {
-    console.error("Erro ao reproduzir áudio:", e);
-    // Fallback para speechSynthesis caso a tag audio falhe
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+  // Envia requisição para o background.js, que tem mais permissões para baixar o áudio
+  // Isso contorna bloqueios de CORS e proteções do Brave Shields na página.
+  chrome.runtime.sendMessage({ action: "playAudio", text: text }, (response) => {
+    if (response && response.audioDataUrl) {
+      const audio = new Audio(response.audioDataUrl);
+      audio.play().catch(e => console.error("Erro ao reproduzir áudio recebido:", e));
     }
+    // Se response não tiver audioDataUrl, o background script já usou o chrome.tts como fallback.
   });
 }
