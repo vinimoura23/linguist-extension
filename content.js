@@ -7,12 +7,18 @@ const iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
 const audioSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
 const saveSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
+let selectionTimeout = null;
+
 document.addEventListener("mouseup", (event) => {
   // Ignorar cliques dentro do tooltip
   if (tooltipContainer && tooltipContainer.contains(event.target)) return;
 
-  // Usa um timeout pequeno para garantir que a seleção foi finalizada pelo navegador
-  setTimeout(() => {
+  // Cancela o timeout anterior se houver (evita bugs de clique duplo)
+  clearTimeout(selectionTimeout);
+  
+  // Aumentamos o delay para 150ms para dar tempo ao navegador de registrar
+  // perfeitamente a seleção por "duplo clique" ou "triplo clique".
+  selectionTimeout = setTimeout(() => {
     const selection = window.getSelection();
     const text = selection.toString().trim();
 
@@ -29,7 +35,7 @@ document.addEventListener("mouseup", (event) => {
     } else {
       removeTooltip();
     }
-  }, 10);
+  }, 150);
 });
 
 // Remove tooltip se clicar fora
