@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Linguist - Flashcards</title>
+  <title>Linguist</title>
   <style>
     body {
       width: 340px;
@@ -12,29 +12,63 @@
       color: #111827;
       margin: 0;
     }
-    h2 {
-      margin-top: 0;
-      font-size: 18px;
-      border-bottom: 1px solid #e5e7eb;
-      padding-bottom: 8px;
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 8px;
     }
+    .top-bar h2 {
+      margin: 0;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #6b7280;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    
+    #flashcards-view, #settings-view { display: none; }
+    #flashcards-view.active, #settings-view.active { display: block; }
+    
     button.clear-btn {
       background: #ef4444;
       color: white;
       border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
+      width: 100%;
+      margin-top: 12px;
     }
     button.clear-btn:hover { background: #dc2626; }
+    
     #flashcards-list {
-      max-height: 400px;
+      max-height: 350px;
       overflow-y: auto;
+      padding-right: 4px;
     }
+    
+    /* Scrollbar */
+    #flashcards-list::-webkit-scrollbar { width: 6px; }
+    #flashcards-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    
     .flashcard {
       background: white;
       border: 1px solid #e5e7eb;
@@ -68,14 +102,69 @@
       margin-top: 30px; 
       font-size: 14px;
     }
+    
+    /* Configurações */
+    .settings-group {
+      margin-bottom: 16px;
+    }
+    .settings-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+    .settings-group select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      background: white;
+    }
+    .saved-msg {
+      color: #10b981;
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h2>
-    Meus Flashcards
-    <button id="clear-all" class="clear-btn">Limpar</button>
-  </h2>
-  <div id="flashcards-list"></div>
+  
+  <div class="top-bar">
+    <h2 id="title">Linguist</h2>
+    <div>
+      <button id="btn-flashcards" class="icon-btn" title="Flashcards" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+      </button>
+      <button id="btn-settings" class="icon-btn" title="Configurações">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="flashcards-view" class="active">
+    <div id="flashcards-list"></div>
+    <button id="clear-all" class="clear-btn">Apagar todos os flashcards</button>
+  </div>
+
+  <div id="settings-view">
+    <div class="settings-group">
+      <label for="lang-select">Idioma de tradução (Destino)</label>
+      <select id="lang-select">
+        <option value="pt">Português</option>
+        <option value="en">Inglês</option>
+        <option value="es">Espanhol</option>
+        <option value="fr">Francês</option>
+        <option value="de">Alemão</option>
+        <option value="it">Italiano</option>
+        <option value="ja">Japonês</option>
+      </select>
+      <div id="settings-saved" class="saved-msg">Salvo automaticamente!</div>
+    </div>
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>

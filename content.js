@@ -138,15 +138,20 @@ function showTranslationPanel(translation) {
 }
 
 function playAudio(text) {
-  if ('speechSynthesis' in window) {
-    // Cancela qualquer fala anterior
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    // Assumindo que a maioria do uso será para aprender inglês
-    utterance.lang = 'en-US'; 
-    utterance.rate = 0.9; // Velocidade levemente reduzida para aprendizado
-    
-    window.speechSynthesis.speak(utterance);
-  }
+  // A API do Google Tradutor via 'tw-ob' costuma ser mais confiável e ter voz melhor
+  // que o window.speechSynthesis, especialmente dentro de extensões.
+  // Assumimos 'en' como idioma padrão de leitura.
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(text)}`;
+  
+  const audio = new Audio(url);
+  audio.play().catch(e => {
+    console.error("Erro ao reproduzir áudio:", e);
+    // Fallback para speechSynthesis caso a tag audio falhe
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
+  });
 }
