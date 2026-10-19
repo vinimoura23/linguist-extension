@@ -9,22 +9,80 @@ document.addEventListener("DOMContentLoaded", () => {
   const title = document.getElementById("title");
   
   const langSelect = document.getElementById("lang-select");
+  const modeSelect = document.getElementById("mode-select");
+  const toggleHover = document.getElementById("toggle-hover");
+  const toggleFormatting = document.getElementById("toggle-formatting");
+  const toggleStyles = document.getElementById("toggle-styles");
+  const toggleBubble = document.getElementById("toggle-bubble");
   const savedMsg = document.getElementById("settings-saved");
 
-  // Load language settings
-  chrome.storage.local.get({ targetLang: 'pt' }, (result) => {
-    langSelect.value = result.targetLang;
+  let savedTimeout = null;
+  function showSavedFeedback() {
+    clearTimeout(savedTimeout);
+    savedMsg.style.display = "block";
+    savedTimeout = setTimeout(() => { savedMsg.style.display = "none"; }, 2000);
+  }
+
+  // Carregar configurações
+  chrome.storage.local.get({
+    targetLang: 'pt',
+    enableFloatingBubble: true,
+    immersiveMode: 'inline-replace',
+    enableWordHover: true,
+    preserveFormatting: true,
+    inheritPageStyles: true
+  }, (result) => {
+    if (langSelect) langSelect.value = result.targetLang || 'pt';
+    if (modeSelect) modeSelect.value = result.immersiveMode || 'inline-replace';
+    if (toggleHover) toggleHover.checked = result.enableWordHover !== false;
+    if (toggleFormatting) toggleFormatting.checked = result.preserveFormatting !== false;
+    if (toggleStyles) toggleStyles.checked = result.inheritPageStyles !== false;
+    if (toggleBubble) toggleBubble.checked = result.enableFloatingBubble !== false;
   });
 
-  // Save language on change
-  langSelect.addEventListener("change", (e) => {
-    chrome.storage.local.set({ targetLang: e.target.value }, () => {
-      savedMsg.style.display = "block";
-      setTimeout(() => { savedMsg.style.display = "none"; }, 2000);
+  // Salvar idioma de destino
+  if (langSelect) {
+    langSelect.addEventListener("change", (e) => {
+      chrome.storage.local.set({ targetLang: e.target.value }, showSavedFeedback);
     });
-  });
+  }
 
-  // Tab switching
+  // Salvar modo de tradução imersivo
+  if (modeSelect) {
+    modeSelect.addEventListener("change", (e) => {
+      chrome.storage.local.set({ immersiveMode: e.target.value }, showSavedFeedback);
+    });
+  }
+
+  // Salvar hover de palavras
+  if (toggleHover) {
+    toggleHover.addEventListener("change", (e) => {
+      chrome.storage.local.set({ enableWordHover: e.target.checked }, showSavedFeedback);
+    });
+  }
+
+  // Salvar preservação de formatação
+  if (toggleFormatting) {
+    toggleFormatting.addEventListener("change", (e) => {
+      chrome.storage.local.set({ preserveFormatting: e.target.checked }, showSavedFeedback);
+    });
+  }
+
+  // Salvar herança de estilos e tipografia da página
+  if (toggleStyles) {
+    toggleStyles.addEventListener("change", (e) => {
+      chrome.storage.local.set({ inheritPageStyles: e.target.checked }, showSavedFeedback);
+    });
+  }
+
+  // Salvar bolha flutuante
+  if (toggleBubble) {
+    toggleBubble.addEventListener("change", (e) => {
+      chrome.storage.local.set({ enableFloatingBubble: e.target.checked }, showSavedFeedback);
+    });
+  }
+
+  // Alternância de abas
   btnSettings.addEventListener("click", () => {
     viewFlashcards.classList.remove("active");
     viewSettings.classList.add("active");

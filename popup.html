@@ -5,7 +5,7 @@
   <title>Linguist</title>
   <style>
     body {
-      width: 340px;
+      width: 360px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       padding: 16px;
       background: #f9fafb;
@@ -78,14 +78,19 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .original { 
-      font-weight: bold; 
-      font-size: 16px;
+      font-weight: 600; 
+      font-size: 15px;
       margin: 0 0 4px 0; 
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     .translated { 
       color: #4f46e5; 
       margin: 0 0 8px 0; 
       font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.5;
     }
     .context { 
       font-size: 12px; 
@@ -95,12 +100,15 @@
       padding: 6px;
       border-radius: 4px;
       margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     .empty { 
       color: #6b7280; 
       text-align: center; 
       margin-top: 30px; 
       font-size: 14px;
+      line-height: 1.5;
     }
     
     /* Configurações */
@@ -109,8 +117,8 @@
     }
     .settings-group label {
       display: block;
-      font-size: 14px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
       margin-bottom: 6px;
       color: #374151;
     }
@@ -119,14 +127,78 @@
       padding: 8px;
       border-radius: 6px;
       border: 1px solid #d1d5db;
-      font-size: 14px;
+      font-size: 13px;
       background: white;
+      color: #111827;
+      box-sizing: border-box;
     }
+    .settings-hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+    /* Switch Toggle */
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+    .toggle-group span {
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #d1d5db;
+      transition: .2s;
+      border-radius: 22px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4f46e5;
+    }
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
     .saved-msg {
       color: #10b981;
       font-size: 13px;
       margin-top: 8px;
+      text-align: center;
       display: none;
+      font-weight: 500;
     }
   </style>
 </head>
@@ -151,6 +223,48 @@
 
   <div id="settings-view">
     <div class="settings-group">
+      <label for="mode-select">Modo de Tradução (Imersivo)</label>
+      <select id="mode-select">
+        <option value="inline-replace" selected>Substituir no texto (In-Place com alternador) — Recomendado</option>
+        <option value="inline-below">Tradução Bilíngue no texto (Abaixo da seleção)</option>
+        <option value="popup-panel">Painel Flutuante Formatado</option>
+      </select>
+      <div class="settings-hint">Define como o texto traduzido será exibido na página web.</div>
+    </div>
+
+    <div class="toggle-group">
+      <span>Significado em inglês ao passar o mouse (Hover)</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-hover" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-group">
+      <span>Preservar formatação da seleção</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-formatting" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-group">
+      <span>Herdar tipografia e estilo da página</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-styles" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="toggle-group">
+      <span>Círculo flutuante ao selecionar</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-bubble" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-group">
       <label for="lang-select">Idioma de tradução (Destino)</label>
       <select id="lang-select">
         <option value="pt">Português</option>
@@ -160,9 +274,11 @@
         <option value="de">Alemão</option>
         <option value="it">Italiano</option>
         <option value="ja">Japonês</option>
+        <option value="zh">Chinês</option>
       </select>
-      <div id="settings-saved" class="saved-msg">Salvo automaticamente!</div>
     </div>
+    
+    <div id="settings-saved" class="saved-msg">✓ Configurações salvas automaticamente!</div>
   </div>
 
   <script src="popup.js"></script>

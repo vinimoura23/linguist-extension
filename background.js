@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "translate") {
     // Buscar idioma alvo das configurações (padrão 'pt')
     chrome.storage.local.get({ targetLang: 'pt' }, (result) => {
-      const targetLang = result.targetLang;
+      const targetLang = request.targetLang || result.targetLang || 'pt';
       const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t`;
       
       fetch(url, {
@@ -12,7 +12,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
         .then(response => response.json())
         .then(data => {
-          const translation = data[0].map(item => item[0]).join("");
+          const translation = (data && data[0]) 
+            ? data[0].filter(item => item && item[0]).map(item => item[0]).join("") 
+            : "";
           sendResponse({ translation: translation });
         })
         .catch(error => {
@@ -41,38 +43,77 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+
+  if (request.action === "lookupWord") {
+    const word = (request.word || "").trim();
+    if (!word) {
+      sendResponse({ translation: "" });
+      return true;
+    }
+    const targetLang = request.targetLang || "en";
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(word)}`;
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        const translation = (data && data[0] && data[0][0]) ? data[0][0][0] : word;
+        sendResponse({ translation: translation });
+      })
+      .catch(err => {
+        console.error("Word lookup error:", err);
+        sendResponse({ error: "Erro na consulta", translation: word });
+      });
+    return true;
+  }
   
   if (request.action === "playAudio") {
-    // A API não-oficial do Google TTS (tw-ob) recusa textos maiores que ~200 caracteres.
-    // Para textos longos, vamos direto para a voz nativa do navegador (chrome.tts).
-    if (request.text.length > 200) {
-      chrome.tts.speak(request.text, { lang: 'en-US' });
-      sendResponse({ error: "Texto muito longo para Google TTS, usando chrome.tts" });
+    const plainText = (request.text || "").replace(/<[^>]*>/g, "").trim();
+    // Se o texto for muito longo para o endpoint de TTS, usa chrome.tts nativo
+    if (plainText.length > 200) {
+      chrome.tts.speak(plainText, { lang: 'en-US' });
+      sendResponse({ error: "Texto longo, usando chrome.tts nativo" });
       return true;
     }
 
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(request.text)}`;
-    fetch(url)
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(plainText)}`;
+    fetch(url, {
+      headers: { 'Accept': 'audio/mpeg,audio/*;q=0.9' }
+    })
       .then(r => {
         if (!r.ok) throw new Error("HTTP error " + r.status);
         return r.arrayBuffer();
       })
       .then(buffer => {
-        let binary = '';
         const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-          binary += String.fromCharCode(bytes[i]);
+        let binary = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
         }
         const base64 = btoa(binary);
         sendResponse({ audioDataUrl: 'data:audio/mp3;base64,' + base64 });
       })
       .catch(error => {
-        console.error("Google TTS via background failed, falling back to chrome.tts", error);
-        // Fallback para chrome.tts no background script
+        console.error("Google TTS falhou no background, acionando fallback chrome.tts:", error);
         chrome.tts.speak(request.text, { lang: 'en-US' });
-        sendResponse({ error: "Usando chrome.tts fallback" });
+        sendResponse({ error: "Fallback para síntese nativa" });
       });
     return true;
+  }
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
+    id: "linguist-translate",
+    title: "Traduzir com Linguist",
+    contexts: ["selection"]
+  });
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === "linguist-translate" && tab && tab.id) {
+    chrome.tabs.sendMessage(tab.id, {
+      action: "triggerContextMenuTranslation",
+      text: info.selectionText
+    });
   }
 });

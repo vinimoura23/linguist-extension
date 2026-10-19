@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Linguist - Flashcard Translator",
-  "version": "0.1.0",
-  "description": "Tradutor que permite salvar palavras como flashcards (MVP).",
+  "version": "0.2.0",
+  "description": "Tradutor imersivo com formatação rica que permite salvar flashcards.",
   "permissions": [
     "storage",
-    "tts"
+    "tts",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://translate.googleapis.com/*",
@@ -21,8 +22,18 @@
       "css": ["content.css"]
     }
   ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Meus Flashcards"
+    "default_title": "Meus Flashcards",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   }
 }
